@@ -147,6 +147,9 @@ function Header() {
           <Link to="/catalogue" activeProps={active} className={linkBase}>
             Catalogue
           </Link>
+          <Link to="/saisie" activeProps={active} className={linkBase}>
+            Saisie
+          </Link>
           <Link to="/contact" activeProps={active} className={linkBase}>
             Contact
           </Link>
