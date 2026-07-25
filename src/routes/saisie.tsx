@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { runDifyWorkflow } from "../lib/dify.functions";
+import { generateVendorFiche } from "../lib/vendor-ai";
 import { useReveal } from "../lib/useReveal";
 
 export const Route = createFileRoute("/saisie")({
@@ -24,37 +24,46 @@ export const Route = createFileRoute("/saisie")({
   component: SaisiePage,
 });
 
+const PLACEHOLDER_DONNEES = `Ex :
+Colobane — Plaquette frein Toyota Corolla : 15 000 FCFA, en stock
+Pikine 25/07/2026 — Batterie 12V 70Ah Universal : 52 000 FCFA, disponible
+Grand Yoff — Alternateur Hyundai Tucson : 65 000 FCFA, rupture
+Thiaroye — Filtre à huile Peugeot 307 : 5 000 FCFA, en stock
+Diamniadio — Démarreur Toyota Corolla : 45 000 FCFA, disponible`;
+
+const EXEMPLES_QUESTIONS = [
+  "Quelles pièces Toyota sont disponibles ?",
+  "Quel est le prix le moins cher ?",
+  "Y a-t-il des pièces à Colobane ?",
+  "Quels articles sont en rupture ?",
+  "Montre-moi tout l'inventaire",
+];
+
 function SaisiePage() {
   const [donnees, setDonnees] = useState("");
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const { ref: headerRef, revealed: headerRevealed } = useReveal<HTMLDivElement>({ threshold: 0.2 });
   const { ref: formRef, revealed: formRevealed } = useReveal<HTMLFormElement>({ threshold: 0.1 });
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!question.trim()) return;
     setLoading(true);
-    setError(null);
     setResult(null);
     try {
-      const res = await runDifyWorkflow({
-        query: question,
-        donnees_vendeur: donnees,
-        user: "vendeur-terrain",
-      });
-      setResult(res.text || "(Aucune réponse)");
+      const res = await generateVendorFiche(question.trim(), donnees);
+      setResult(res.text);
       toast.success("Fiche générée ✅", {
         description: "Le résultat s'affiche ci-dessous.",
         duration: 3000,
       });
     } catch (err) {
       console.error(err);
-      setError("❌ Erreur — réessayer");
-      toast.error("Erreur lors de la génération", {
-        description: "Vérifiez votre connexion et réessayez.",
+      toast.error("Erreur inattendue", {
+        description: "Veuillez réessayer.",
         duration: 4000,
       });
     } finally {
@@ -66,7 +75,8 @@ function SaisiePage() {
     "mt-2 w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground shadow-sm transition-all duration-200 placeholder:text-muted-foreground focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 hover:border-brand/50";
 
   return (
-    <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14 dark:bg-card/30">
+    <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+      {/* ── En-tête ── */}
       <div ref={headerRef} className="mb-6">
         <h1
           className={`text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl transition-all duration-700 ${
@@ -81,31 +91,39 @@ function SaisiePage() {
           }`}
           style={{ transitionDelay: "100ms" }}
         >
-          Vendeur / Mécanicien partenaire — Données en temps réel
+          Vendeur / Mécanicien partenaire — Analyse IA locale, sans connexion requise
         </p>
       </div>
 
+      {/* ── Étapes ── */}
       <div
-        className={`mb-8 flex items-center gap-4 transition-all duration-700 ${
+        className={`mb-8 flex flex-wrap items-center gap-3 transition-all duration-700 ${
           headerRevealed ? "revealed opacity-100 translate-y-0" : "opacity-0 translate-y-6"
         }`}
         style={{ transitionDelay: "200ms" }}
       >
         {[
-          { n: "1", t: "Saisir les données terrain" },
-          { n: "2", t: "Poser votre question" },
-          { n: "3", t: "Obtenir la fiche" },
+          { n: "1", t: "Saisir les données terrain", icon: "📝" },
+          { n: "2", t: "Poser votre question", icon: "❓" },
+          { n: "3", t: "Obtenir la fiche", icon: "📋" },
         ].map((step, i) => (
           <div key={step.n} className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand/10 text-xs font-bold text-brand">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-white shadow-sm">
               {step.n}
             </span>
-            <span className="hidden text-xs font-medium text-foreground/70 sm:inline">{step.t}</span>
-            {i < 2 && <span className="text-muted-foreground/30">→</span>}
+            <span className="hidden text-xs font-medium text-foreground/70 sm:inline">
+              {step.icon} {step.t}
+            </span>
+            {i < 2 && <span className="text-muted-foreground/40 ml-1">→</span>}
           </div>
         ))}
+        <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success">
+          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+          IA locale — aucune API
+        </span>
       </div>
 
+      {/* ── Formulaire ── */}
       <form
         ref={formRef}
         onSubmit={onSubmit}
@@ -114,20 +132,28 @@ function SaisiePage() {
         }`}
       >
         <div className="space-y-5">
+          {/* Données terrain */}
           <div>
             <label htmlFor="donnees" className="block text-sm font-semibold text-foreground">
-              Pièces disponibles observées
+              Pièces observées sur le terrain
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                (une pièce par ligne)
+              </span>
             </label>
             <textarea
               id="donnees"
-              rows={6}
+              rows={7}
               value={donnees}
               onChange={(e) => setDonnees(e.target.value)}
-              placeholder="Ex: Pikine 23/07/2026 14h — Plaquette de frein Toyota Corolla : 8000 FCFA, en stock"
-              className={inputCls + " resize-y dark:bg-background dark:placeholder:text-muted-foreground"}
+              placeholder={PLACEHOLDER_DONNEES}
+              className={inputCls + " resize-y font-mono text-xs leading-relaxed dark:bg-background"}
             />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              Format libre : zone, pièce, marque, prix en FCFA, statut (en stock / rupture)
+            </p>
           </div>
 
+          {/* Question */}
           <div>
             <label htmlFor="question" className="block text-sm font-semibold text-foreground">
               Votre question
@@ -137,48 +163,89 @@ function SaisiePage() {
               type="text"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Ex: Quel est le prix d'un alternateur pour Renault Logan ?"
-              className={inputCls + " dark:bg-background dark:placeholder:text-muted-foreground"}
+              placeholder="Ex : Quelles pièces Toyota sont disponibles à Colobane ?"
+              className={inputCls + " dark:bg-background"}
               required
             />
+
+            {/* Questions exemples */}
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {EXEMPLES_QUESTIONS.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => setQuestion(ex)}
+                  className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-all hover:border-brand hover:text-brand hover:bg-brand/5"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="group relative inline-flex w-full items-center justify-center overflow-hidden rounded-lg bg-brand px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-          >
-            <span className="absolute inset-0 animate-shimmer" />
-            {loading ? (
-              <span className="relative inline-flex items-center gap-2">
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Génération en cours…
-              </span>
-            ) : (
-              <span className="relative">🔧 Générer la fiche</span>
+          {/* Bouton */}
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={loading || !question.trim()}
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-brand px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <span className="absolute inset-0 animate-shimmer" />
+              {loading ? (
+                <span className="relative inline-flex items-center gap-2">
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Analyse en cours…
+                </span>
+              ) : (
+                <span className="relative">🔧 Générer la fiche</span>
+              )}
+            </button>
+
+            {(donnees || question || result) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDonnees("");
+                  setQuestion("");
+                  setResult(null);
+                }}
+                className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground transition-all hover:border-danger/50 hover:text-danger hover:bg-danger/5"
+              >
+                Réinitialiser
+              </button>
             )}
-          </button>
+          </div>
         </div>
       </form>
 
-      {error && (
-        <div className="mt-6 animate-scale-in rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
-          {error}
-        </div>
-      )}
+      {/* ── Résultat ── */}
+      {result !== null && (
+        <div className="mt-6 animate-fade-in-up">
+          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+            {/* Barre de titre */}
+            <div className="flex items-center justify-between border-b border-border bg-brand/5 px-5 py-3">
+              <div className="flex items-center gap-2">
+                <span className="text-brand">📋</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-brand">
+                  Fiche générée
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(result);
+                  toast.success("Copié !", { duration: 2000 });
+                }}
+                className="rounded-md px-2.5 py-1 text-xs font-medium text-muted-foreground transition-all hover:text-foreground hover:bg-muted"
+              >
+                📋 Copier
+              </button>
+            </div>
 
-      {result !== null && !error && (
-        <div
-          className="mt-6 animate-fade-in rounded-xl border border-border bg-card px-5 py-4 text-sm text-foreground shadow-sm"
-          style={{ whiteSpace: "pre-line" }}
-        >
-          <div className="mb-3 flex items-center gap-2 border-b border-border pb-2">
-            <span className="text-brand">📋</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-brand">
-              Résultat
-            </span>
+            {/* Contenu */}
+            <pre className="whitespace-pre-wrap break-words px-5 py-4 font-mono text-xs leading-relaxed text-foreground sm:text-sm">
+              {result}
+            </pre>
           </div>
-          {result}
         </div>
       )}
     </section>
