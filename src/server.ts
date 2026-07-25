@@ -3,51 +3,6 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
-/* ── Polyfills SSR ────────────────────────────────────
- * Certaines librairies (sonner, recharts…) accèdent à
- * window/document pendant l'import sans garde.          */
-if (typeof globalThis !== "undefined" && !("window" in globalThis)) {
-  const g = globalThis as unknown as Record<string, unknown>;
-  const noop = () => {};
-  const def = (key: string, value: unknown) => { if (!(key in g)) g[key] = value; };
-
-  def("window", globalThis);
-  def("self", globalThis);
-  def("global", globalThis);
-  def("document", {
-    documentElement: { style: {} },
-    createElement: () => ({ style: {} as CSSStyleDeclaration, appendChild: noop, setAttribute: noop }),
-    createTextNode: () => ({}) as Text,
-    head: { appendChild: noop },
-    getElementsByTagName: () => [{ appendChild: noop }],
-  });
-  def("navigator", { userAgent: "Node", platform: "Node" });
-  def("location", { href: "", origin: "", pathname: "/", search: "" });
-  def("localStorage", {
-    getItem: () => null, setItem: noop, removeItem: noop, clear: noop,
-    get length() { return 0; }, key: () => null,
-  });
-  def("addEventListener", noop);
-  def("removeEventListener", noop);
-  def("matchMedia", () => ({
-    matches: false, media: "",
-    addEventListener: noop, removeEventListener: noop,
-    addListener: noop, removeListener: noop,
-    onchange: null, dispatchEvent: () => false,
-  }));
-  def("screen", {
-    width: 1024, height: 768, availWidth: 1024, availHeight: 768,
-    colorDepth: 24, pixelDepth: 24,
-    deviceXDPI: 96, logicalXDPI: 96,
-    availLeft: 0, availTop: 0,
-  });
-  def("cancelAnimationFrame", noop);
-  def("requestAnimationFrame", (cb: FrameRequestCallback) => {
-    if (typeof setImmediate === "function") return setImmediate(() => cb(0));
-    return setTimeout(() => cb(0), 0);
-  });
-}
-
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
