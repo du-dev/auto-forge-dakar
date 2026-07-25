@@ -1,15 +1,12 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 
-import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -99,7 +96,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.ico" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -108,84 +105,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
   }),
-  shellComponent: RootShell,
-  component: RootComponent,
+  component: RootLayout,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
-
-function PwaRegister() {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    // Register service worker
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        // silent — PWA is optional
-      });
-    }
-  }, []);
-  return null;
-}
-
-function FloatingWhatsApp() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setShow(window.scrollY > 300);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <a
-      href="https://wa.me/221778000000?text=Bonjour%20AutoForge%20!%20J%27ai%20besoin%20d%27une%20pi%C3%A8ce%20auto%20%C3%A0%20Dakar."
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-2xl text-white shadow-lg transition-all duration-500 hover:scale-110 hover:shadow-xl hover:rotate-6 ${
-        show ? "translate-y-0 opacity-100 scale-100 animate-pulse-ring" : "translate-y-4 opacity-0 scale-75 pointer-events-none"
-      }`}
-      aria-label="Contacter AutoForge sur WhatsApp"
-    >
-      💬
-    </a>
-  );
-}
-
-function RootShell({ children }: { children: ReactNode }) {
-  return (
-    <html lang="fr">
-      <head>
-        <HeadContent />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1565C0" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="AutoForge" />
-      </head>
-      <body>
-        {children}
-        <PwaRegister />
-        <FloatingWhatsApp />
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              fontFamily: "Inter, sans-serif",
-              fontSize: "14px",
-              borderRadius: "12px",
-              padding: "12px 16px",
-              border: "1px solid var(--border)",
-              background: "var(--card)",
-              color: "var(--foreground)",
-            },
-          }}
-          richColors
-          closeButton
-        />
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -196,7 +119,6 @@ function Header() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
 
-  /* Sync dark class & localStorage */
   useEffect(() => {
     const root = document.documentElement;
     if (dark) {
@@ -207,7 +129,6 @@ function Header() {
     localStorage.setItem("autoforge-dark-mode", String(dark));
   }, [dark]);
 
-  /* Bloquer le scroll arrière-plan quand le menu mobile est ouvert */
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = "hidden";
@@ -231,7 +152,6 @@ function Header() {
   const active = { className: "text-brand font-semibold after:w-full" };
   const mobileActive = { className: "text-brand font-semibold bg-brand/10" };
 
-  /* Fermer le menu quand on clique sur un lien */
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -244,7 +164,6 @@ function Header() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
         <nav className="hidden items-center gap-4 sm:flex sm:gap-6">
           <Link to="/" activeOptions={{ exact: true }} activeProps={active} className={linkBase}>
             Accueil
@@ -259,7 +178,6 @@ function Header() {
             Contact
           </Link>
 
-          {/* Dark mode toggle — desktop */}
           <button
             onClick={() => setDark((d) => !d)}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground/70 transition-all duration-200 hover:border-brand hover:text-brand hover:bg-brand/5"
@@ -271,7 +189,6 @@ function Header() {
           </button>
         </nav>
 
-        {/* Hamburger button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-border text-foreground transition-all hover:bg-brand/5 focus:outline-none focus:ring-2 focus:ring-brand/30 sm:hidden"
@@ -282,7 +199,6 @@ function Header() {
         </button>
       </div>
 
-      {/* Mobile overlay */}
       {menuOpen && (
         <div
           className="fixed inset-0 top-16 z-40 bg-black/30 backdrop-blur-sm sm:hidden animate-fade-in"
@@ -290,7 +206,6 @@ function Header() {
         />
       )}
 
-      {/* Mobile nav panel */}
       <div
         className={`fixed inset-x-0 top-16 z-50 border-b border-border bg-background shadow-lg sm:hidden transition-all duration-300 ${
           menuOpen
@@ -333,7 +248,6 @@ function Header() {
             ✉️ Contact
           </Link>
 
-          {/* Dark mode toggle — mobile */}
           <button
             onClick={() => {
               setDark((d) => !d);
@@ -356,7 +270,7 @@ function Footer() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🔧</span>
+            <span className="text-2xl" aria-hidden>🔧</span>
             <span className="text-lg font-extrabold">AutoForge</span>
           </div>
           <p className="mt-3 text-sm text-background/70 dark:text-foreground/60">
@@ -393,18 +307,14 @@ function Footer() {
   );
 }
 
-function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
-
+function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col bg-background">
-        <Header />
-        <main className="flex-1 pt-16">
-          <Outlet />
-        </main>
-        <Footer />
-      </div>
-    </QueryClientProvider>
+    <div className="flex min-h-screen flex-col bg-background">
+      <Header />
+      <main className="flex-1 pt-16">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
   );
 }

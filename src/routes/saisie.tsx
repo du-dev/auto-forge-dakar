@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { runDifyWorkflow } from "../lib/dify.functions";
@@ -26,7 +25,6 @@ export const Route = createFileRoute("/saisie")({
 });
 
 function SaisiePage() {
-  const runDify = useServerFn(runDifyWorkflow);
   const [donnees, setDonnees] = useState("");
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,12 +40,10 @@ function SaisiePage() {
     setError(null);
     setResult(null);
     try {
-      const res = await runDify({
-        data: {
-          query: question,
-          donnees_vendeur: donnees,
-          user: "vendeur-terrain",
-        },
+      const res = await runDifyWorkflow({
+        query: question,
+        donnees_vendeur: donnees,
+        user: "vendeur-terrain",
       });
       setResult(res.text || "(Aucune réponse)");
       toast.success("Fiche générée ✅", {
@@ -71,7 +67,6 @@ function SaisiePage() {
 
   return (
     <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14 dark:bg-card/30">
-      {/* Header */}
       <div ref={headerRef} className="mb-6">
         <h1
           className={`text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl transition-all duration-700 ${
@@ -90,7 +85,6 @@ function SaisiePage() {
         </p>
       </div>
 
-      {/* Step indicators */}
       <div
         className={`mb-8 flex items-center gap-4 transition-all duration-700 ${
           headerRevealed ? "revealed opacity-100 translate-y-0" : "opacity-0 translate-y-6"
@@ -112,7 +106,6 @@ function SaisiePage() {
         ))}
       </div>
 
-      {/* Form */}
       <form
         ref={formRef}
         onSubmit={onSubmit}
@@ -168,14 +161,12 @@ function SaisiePage() {
         </div>
       </form>
 
-      {/* Error */}
       {error && (
         <div className="mt-6 animate-scale-in rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
           {error}
         </div>
       )}
 
-      {/* Result */}
       {result !== null && !error && (
         <div
           className="mt-6 animate-fade-in rounded-xl border border-border bg-card px-5 py-4 text-sm text-foreground shadow-sm"
