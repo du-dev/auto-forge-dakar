@@ -1,10 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 
+/* ── Types ─────────────────────────────────────────────── */
+
 type DifyInput = {
   query: string;
   donnees_vendeur?: string;
   user?: string;
 };
+
+type ExpertInput = {
+  question: string;
+};
+
+/* ── Saisie partenaire (existante) ─────────────────────── */
 
 export const runDifyWorkflow = createServerFn({ method: "POST" })
   .inputValidator((data: DifyInput) => {
@@ -56,3 +64,5 @@ export const runDifyWorkflow = createServerFn({ method: "POST" })
       clearTimeout(timeout);
     }
   });
+
+
