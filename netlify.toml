@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build && rm -rf .netlify/functions-internal"
+  command = "npm run build && rm -rf .netlify/functions-internal && node generate-static-html.js"
   publish = "dist"
   installCommand = "npm install --legacy-peer-deps"
 
