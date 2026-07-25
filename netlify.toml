@@ -1,13 +1,14 @@
 [build]
-  command = "npm run build"
+  command = "npm run build && rm -rf .netlify/functions-internal"
   publish = "dist"
   installCommand = "npm install --legacy-peer-deps"
 
 [build.environment]
   NITRO_PRESET = "netlify"
 
-# Sert toutes les routes en statique (index.html) pour que le SSR ne soit pas appelé
-# TanStack Router gère la navigation côté client
+# Sert toutes les routes en statique (index.html) — les fonctions SSR
+# sont supprimées après le build pour forcer Netlify en mode statique pur.
+# TanStack Router gère la navigation côté client.
 [[redirects]]
   from = "/*"
   to = "/index.html"
