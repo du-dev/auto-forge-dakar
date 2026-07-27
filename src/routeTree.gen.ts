@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CatalogueRouteImport } from './routes/catalogue'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FournisseursRouteImport } from './routes/fournisseurs'
 import { Route as SaisieRouteImport } from './routes/saisie'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FournisseursRoute = FournisseursRouteImport.update({
+  id: '/fournisseurs',
+  path: '/fournisseurs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SaisieRoute = SaisieRouteImport.update({
   id: '/saisie',
   path: '/saisie',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
+  '/fournisseurs': typeof FournisseursRoute
   '/saisie': typeof SaisieRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
+  '/fournisseurs': typeof FournisseursRoute
   '/saisie': typeof SaisieRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/catalogue': typeof CatalogueRoute
   '/contact': typeof ContactRoute
+  '/fournisseurs': typeof FournisseursRoute
   '/saisie': typeof SaisieRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/catalogue' | '/contact' | '/saisie'
+  fullPaths: '/' | '/catalogue' | '/contact' | '/fournisseurs' | '/saisie'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/catalogue' | '/contact' | '/saisie'
-  id: '__root__' | '/' | '/catalogue' | '/contact' | '/saisie'
+  to: '/' | '/catalogue' | '/contact' | '/fournisseurs' | '/saisie'
+  id: '__root__' | '/' | '/catalogue' | '/contact' | '/fournisseurs' | '/saisie'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CatalogueRoute: typeof CatalogueRoute
   ContactRoute: typeof ContactRoute
+  FournisseursRoute: typeof FournisseursRoute
   SaisieRoute: typeof SaisieRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fournisseurs': {
+      id: '/fournisseurs'
+      path: '/fournisseurs'
+      fullPath: '/fournisseurs'
+      preLoaderRoute: typeof FournisseursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/saisie': {
       id: '/saisie'
       path: '/saisie'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CatalogueRoute: CatalogueRoute,
   ContactRoute: ContactRoute,
+  FournisseursRoute: FournisseursRoute,
   SaisieRoute: SaisieRoute,
 }
 export const routeTree = rootRouteImport

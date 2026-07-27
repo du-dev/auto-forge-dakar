@@ -20,6 +20,12 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Environment variables (API keys, tokens)
+.env
+
+# Netlify generated files
+.netlify/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

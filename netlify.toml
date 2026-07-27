@@ -2,3 +2,11 @@
   command = "npm run build"
   publish = "dist"
   installCommand = "npm install --legacy-peer-deps"
+
+# Fonction serverless pour la reconnaissance vocale Whisper
+[functions]
+  directory = "netlify/functions"
+
+# Variables d'environnement (token Hugging Face)
+# À configurer dans le dashboard Netlify : Site settings → Environment variables
+# HF_TOKEN = hf_votre_token

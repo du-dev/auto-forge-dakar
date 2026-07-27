@@ -5,6 +5,7 @@ import SupplierMap from "../components/SupplierMap";
 import { searchCatalogue } from "../lib/catalogue-search";
 import { useReveal } from "../lib/useReveal";
 import type { Part } from "../lib/types";
+import VoiceSearch from "../components/VoiceSearch";
 import { formatFCFA } from "../lib/utils";
 
 export const Route = createFileRoute("/catalogue")({
@@ -256,18 +257,21 @@ function CataloguePage() {
 
       {/* ── Filters bar ── */}
       <div className="mb-6 space-y-4 animate-fade-in animation-delay-200">
-        {/* Search */}
-        <div className="relative">
-          <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden>
-            🔍
-          </span>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher une pièce, une zone…"
-            className="w-full rounded-lg border border-border bg-background py-3 pl-11 pr-4 text-sm text-foreground outline-none transition-all duration-200 focus:border-brand focus:ring-2 focus:ring-brand/30"
-          />
+        {/* Search + Voice */}
+        <div className="relative flex items-center gap-2">
+          <div className="relative flex-1">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" aria-hidden>
+              🔍
+            </span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher une pièce, une zone ou utilisez le micro…"
+              className="w-full rounded-lg border border-border bg-background py-3 pl-11 pr-4 text-sm text-foreground outline-none transition-all duration-200 focus:border-brand focus:ring-2 focus:ring-brand/30"
+            />
+          </div>
+          <VoiceSearch onResult={(text) => setSearch(text)} disabled={loading} />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">

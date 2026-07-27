@@ -158,7 +158,23 @@ function Header() {
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" onClick={closeMenu} className="group flex items-center gap-2 transition-transform hover:scale-105">
-          <span className="text-2xl transition-transform duration-300 group-hover:animate-float" aria-hidden>🔧</span>
+          <svg className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="90" fill="#1565C0" opacity="0.1"/>
+            <g transform="translate(100,95)">
+              <circle cx="0" cy="0" r="22" stroke="#1565C0" strokeWidth="5" fill="none"/>
+              <circle cx="0" cy="0" r="10" fill="#1565C0"/>
+              <rect x="-3" y="-28" width="6" height="8" rx="1" fill="#1565C0"/>
+              <rect x="-3" y="20" width="6" height="8" rx="1" fill="#1565C0"/>
+              <rect x="-28" y="-3" width="8" height="6" rx="1" fill="#1565C0"/>
+              <rect x="20" y="-3" width="8" height="6" rx="1" fill="#1565C0"/>
+              <rect x="14" y="-22" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(45,17,-18)"/>
+              <rect x="-20" y="-22" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(-45,-17,-18)"/>
+              <rect x="14" y="14" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(-45,17,18)"/>
+              <rect x="-20" y="14" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(45,-17,18)"/>
+              <path d="M-8,-35 L8,-35 L8,-28 L-2,-28 L-2,-10 L8,-10 L8,-3 L-2,-3 L-2,15 L-8,15 Z" fill="#F59E0B"/>
+            </g>
+            <text x="100" y="155" textAnchor="middle" fontFamily="Inter, Arial, sans-serif" fontSize="40" fontWeight="800" fill="#1565C0">AF</text>
+          </svg>
           <span className="text-lg font-extrabold tracking-tight text-foreground">
             Auto<span className="text-brand">Forge</span>
           </span>
@@ -173,6 +189,9 @@ function Header() {
           </Link>
           <Link to="/saisie" activeProps={active} className={linkBase}>
             Saisie
+          </Link>
+          <Link to="/fournisseurs" activeProps={active} className={linkBase}>
+            Fournisseurs
           </Link>
           <Link to="/contact" activeProps={active} className={linkBase}>
             Contact
@@ -240,6 +259,14 @@ function Header() {
             📝 Saisie
           </Link>
           <Link
+            to="/fournisseurs"
+            activeProps={mobileActive}
+            className={mobileLinkBase}
+            onClick={closeMenu}
+          >
+            🏪 Fournisseurs
+          </Link>
+          <Link
             to="/contact"
             activeProps={mobileActive}
             className={mobileLinkBase}
@@ -266,20 +293,36 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="border-t border-border bg-foreground text-background/90 dark:bg-card dark:text-foreground/90">
+    <footer className="border-t border-border bg-card text-foreground/80 dark:bg-card dark:text-foreground/90">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl" aria-hidden>🔧</span>
+            <svg className="h-8 w-8" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="100" cy="100" r="90" fill="currentColor" opacity="0.15"/>
+              <g transform="translate(100,95)">
+                <circle cx="0" cy="0" r="22" stroke="currentColor" strokeWidth="5" fill="none"/>
+                <circle cx="0" cy="0" r="10" fill="currentColor"/>
+                <rect x="-3" y="-28" width="6" height="8" rx="1" fill="currentColor"/>
+                <rect x="-3" y="20" width="6" height="8" rx="1" fill="currentColor"/>
+                <rect x="-28" y="-3" width="8" height="6" rx="1" fill="currentColor"/>
+                <rect x="20" y="-3" width="8" height="6" rx="1" fill="currentColor"/>
+                <rect x="14" y="-22" width="6" height="8" rx="1" fill="currentColor" transform="rotate(45,17,-18)"/>
+                <rect x="-20" y="-22" width="6" height="8" rx="1" fill="currentColor" transform="rotate(-45,-17,-18)"/>
+                <rect x="14" y="14" width="6" height="8" rx="1" fill="currentColor" transform="rotate(-45,17,18)"/>
+                <rect x="-20" y="14" width="6" height="8" rx="1" fill="currentColor" transform="rotate(45,-17,18)"/>
+                <path d="M-8,-35 L8,-35 L8,-28 L-2,-28 L-2,-10 L8,-10 L8,-3 L-2,-3 L-2,15 L-8,15 Z" fill="#F59E0B"/>
+              </g>
+              <text x="100" y="155" textAnchor="middle" fontFamily="Inter, Arial, sans-serif" fontSize="40" fontWeight="800" fill="currentColor">AF</text>
+            </svg>
             <span className="text-lg font-extrabold">AutoForge</span>
           </div>
-          <p className="mt-3 text-sm text-background/70 dark:text-foreground/60">
+          <p className="mt-3 text-sm text-foreground/70">
             La plateforme de référence des pièces détachées automobiles à Dakar.
           </p>
         </div>
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-background dark:text-foreground">Contact</h3>
-          <ul className="mt-3 space-y-1 text-sm text-background/70 dark:text-foreground/60">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">Contact</h3>
+          <ul className="mt-3 space-y-1 text-sm text-foreground/70">
             <li>Route de Diamniadio, Zone Industrielle, Dakar</li>
             <li>contact@autoforge.sn</li>
             <li>+221 33 800 00 00</li>
@@ -288,7 +331,7 @@ function Footer() {
                 href="https://wa.me/221778000000"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 underline-offset-2 hover:text-background hover:underline dark:hover:text-foreground"
+                className="inline-flex items-center gap-1.5 underline-offset-2 hover:text-brand hover:underline"
               >
                 <span aria-hidden>💬</span>
                 WhatsApp
@@ -297,8 +340,8 @@ function Footer() {
           </ul>
         </div>
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-background dark:text-foreground">Mentions légales</h3>
-          <p className="mt-3 text-sm text-background/70 dark:text-foreground/60">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">Mentions légales</h3>
+          <p className="mt-3 text-sm text-foreground/70">
             © {new Date().getFullYear()} AutoForge SARL — RC Dakar. Tous droits réservés.
           </p>
         </div>

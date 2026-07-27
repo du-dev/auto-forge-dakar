@@ -172,6 +172,12 @@ function SupplierMapClient({
               >
                 Voir les pièces
               </button>
+              <a
+                href={`/fournisseurs?zone=${encodeURIComponent(m.zone)}`}
+                className="mt-1 block w-full rounded border border-brand bg-white px-2 py-1 text-center text-xs font-medium text-brand hover:bg-brand/5"
+              >
+                🏪 Détail fournisseur →
+              </a>
             </Popup>
           </Marker>
         ))}
