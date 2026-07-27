@@ -96,7 +96,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico" },
+      { rel: "icon", href: "/icon.svg" },
+      { rel: "icon", href: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -159,21 +160,30 @@ function Header() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link to="/" onClick={closeMenu} className="group flex items-center gap-2 transition-transform hover:scale-105">
           <svg className="h-8 w-8 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="100" cy="100" r="90" fill="#1565C0" opacity="0.1"/>
+            <defs>
+              <linearGradient id="hdrGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1565C0"/>
+                <stop offset="100%" stop-color="#0D47A1"/>
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="92" fill="#1565C0" opacity="0.06"/>
             <g transform="translate(100,95)">
-              <circle cx="0" cy="0" r="22" stroke="#1565C0" strokeWidth="5" fill="none"/>
-              <circle cx="0" cy="0" r="10" fill="#1565C0"/>
-              <rect x="-3" y="-28" width="6" height="8" rx="1" fill="#1565C0"/>
-              <rect x="-3" y="20" width="6" height="8" rx="1" fill="#1565C0"/>
-              <rect x="-28" y="-3" width="8" height="6" rx="1" fill="#1565C0"/>
-              <rect x="20" y="-3" width="8" height="6" rx="1" fill="#1565C0"/>
-              <rect x="14" y="-22" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(45,17,-18)"/>
-              <rect x="-20" y="-22" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(-45,-17,-18)"/>
-              <rect x="14" y="14" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(-45,17,18)"/>
-              <rect x="-20" y="14" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(45,-17,18)"/>
-              <path d="M-8,-35 L8,-35 L8,-28 L-2,-28 L-2,-10 L8,-10 L8,-3 L-2,-3 L-2,15 L-8,15 Z" fill="#F59E0B"/>
+              <circle cx="0" cy="0" r="24" fill="none" stroke="#1565C0" stroke-width="3.5" opacity="0.3"/>
+              <g fill="#1565C0" opacity="0.4">
+                <rect x="-3" y="-30" width="6" height="9" rx="1.5"/>
+                <rect x="-3" y="21" width="6" height="9" rx="1.5"/>
+                <rect x="-30" y="-3" width="9" height="6" rx="1.5"/>
+                <rect x="21" y="-3" width="9" height="6" rx="1.5"/>
+                <rect x="15" y="-24" width="6" height="9" rx="1.5" transform="rotate(45,18,-19.5)"/>
+                <rect x="-21" y="-24" width="6" height="9" rx="1.5" transform="rotate(-45,-18,-19.5)"/>
+                <rect x="15" y="15" width="6" height="9" rx="1.5" transform="rotate(-45,18,19.5)"/>
+                <rect x="-21" y="15" width="6" height="9" rx="1.5" transform="rotate(45,-18,19.5)"/>
+              </g>
+              <circle cx="0" cy="0" r="14" fill="#1565C0" opacity="0.15"/>
+              <circle cx="0" cy="0" r="8" fill="#1565C0"/>
             </g>
-            <text x="100" y="155" textAnchor="middle" fontFamily="Inter, Arial, sans-serif" fontSize="40" fontWeight="800" fill="#1565C0">AF</text>
+            <text x="100" y="148" textAnchor="middle" fontFamily="Inter, 'Segoe UI', Arial, sans-serif" fontSize="44" fontWeight="800" fill="#1565C0" letterSpacing="-1">AF</text>
+            <rect x="72" y="155" width="56" height="3" rx="1.5" fill="#F59E0B"/>
           </svg>
           <span className="text-lg font-extrabold tracking-tight text-foreground">
             Auto<span className="text-brand">Forge</span>
@@ -298,21 +308,24 @@ function Footer() {
         <div>
           <div className="flex items-center gap-2">
             <svg className="h-8 w-8" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="100" cy="100" r="90" fill="currentColor" opacity="0.15"/>
+              <circle cx="100" cy="100" r="92" fill="currentColor" opacity="0.08"/>
               <g transform="translate(100,95)">
-                <circle cx="0" cy="0" r="22" stroke="currentColor" strokeWidth="5" fill="none"/>
-                <circle cx="0" cy="0" r="10" fill="currentColor"/>
-                <rect x="-3" y="-28" width="6" height="8" rx="1" fill="currentColor"/>
-                <rect x="-3" y="20" width="6" height="8" rx="1" fill="currentColor"/>
-                <rect x="-28" y="-3" width="8" height="6" rx="1" fill="currentColor"/>
-                <rect x="20" y="-3" width="8" height="6" rx="1" fill="currentColor"/>
-                <rect x="14" y="-22" width="6" height="8" rx="1" fill="currentColor" transform="rotate(45,17,-18)"/>
-                <rect x="-20" y="-22" width="6" height="8" rx="1" fill="currentColor" transform="rotate(-45,-17,-18)"/>
-                <rect x="14" y="14" width="6" height="8" rx="1" fill="currentColor" transform="rotate(-45,17,18)"/>
-                <rect x="-20" y="14" width="6" height="8" rx="1" fill="currentColor" transform="rotate(45,-17,18)"/>
-                <path d="M-8,-35 L8,-35 L8,-28 L-2,-28 L-2,-10 L8,-10 L8,-3 L-2,-3 L-2,15 L-8,15 Z" fill="#F59E0B"/>
+                <circle cx="0" cy="0" r="24" fill="none" stroke="currentColor" stroke-width="3.5" opacity="0.3"/>
+                <g fill="currentColor" opacity="0.4">
+                  <rect x="-3" y="-30" width="6" height="9" rx="1.5"/>
+                  <rect x="-3" y="21" width="6" height="9" rx="1.5"/>
+                  <rect x="-30" y="-3" width="9" height="6" rx="1.5"/>
+                  <rect x="21" y="-3" width="9" height="6" rx="1.5"/>
+                  <rect x="15" y="-24" width="6" height="9" rx="1.5" transform="rotate(45,18,-19.5)"/>
+                  <rect x="-21" y="-24" width="6" height="9" rx="1.5" transform="rotate(-45,-18,-19.5)"/>
+                  <rect x="15" y="15" width="6" height="9" rx="1.5" transform="rotate(-45,18,19.5)"/>
+                  <rect x="-21" y="15" width="6" height="9" rx="1.5" transform="rotate(45,-18,19.5)"/>
+                </g>
+                <circle cx="0" cy="0" r="14" fill="currentColor" opacity="0.15"/>
+                <circle cx="0" cy="0" r="8" fill="currentColor"/>
               </g>
-              <text x="100" y="155" textAnchor="middle" fontFamily="Inter, Arial, sans-serif" fontSize="40" fontWeight="800" fill="currentColor">AF</text>
+              <text x="100" y="148" textAnchor="middle" fontFamily="Inter, 'Segoe UI', Arial, sans-serif" fontSize="44" fontWeight="800" fill="currentColor" letterSpacing="-1">AF</text>
+              <rect x="72" y="155" width="56" height="3" rx="1.5" fill="#F59E0B" opacity="0.8"/>
             </svg>
             <span className="text-lg font-extrabold">AutoForge</span>
           </div>

@@ -1,29 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#1565C0"/>
       <stop offset="100%" stop-color="#0D47A1"/>
     </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
   </defs>
-  <!-- Cercle de fond -->
-  <circle cx="100" cy="100" r="90" fill="url(#bg)" opacity="0.1"/>
-  <!-- Clé à molette + engrenage -->
-  <g transform="translate(100,95)" fill="#1565C0">
-    <!-- Engrenage (cercle cranté) -->
-    <circle cx="0" cy="0" r="22" fill="none" stroke="#1565C0" stroke-width="5"/>
-    <circle cx="0" cy="0" r="10" fill="#1565C0"/>
-    <!-- Dents de l'engrenage -->
-    <rect x="-3" y="-28" width="6" height="8" rx="1" fill="#1565C0"/>
-    <rect x="-3" y="20" width="6" height="8" rx="1" fill="#1565C0"/>
-    <rect x="-28" y="-3" width="8" height="6" rx="1" fill="#1565C0"/>
-    <rect x="20" y="-3" width="8" height="6" rx="1" fill="#1565C0"/>
-    <rect x="14" y="-22" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(45,17,-18)"/>
-    <rect x="-20" y="-22" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(-45,-17,-18)"/>
-    <rect x="14" y="14" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(-45,17,18)"/>
-    <rect x="-20" y="14" width="6" height="8" rx="1" fill="#1565C0" transform="rotate(45,-17,18)"/>
-    <!-- Clé à molette -->
-    <path d="M-8,-35 L8,-35 L8,-28 L-2,-28 L-2,-10 L8,-10 L8,-3 L-2,-3 L-2,15 L-8,15 Z" fill="#F59E0B"/>
+
+  <!-- Fond circulaire subtil -->
+  <circle cx="100" cy="100" r="92" fill="url(#brandGrad)" opacity="0.06"/>
+
+  <!-- Engrenage extérieur -->
+  <g transform="translate(100,95)">
+    <circle cx="0" cy="0" r="24" fill="none" stroke="url(#brandGrad)" stroke-width="3.5" opacity="0.3"/>
+    
+    <!-- Dents d'engrenage stylisées -->
+    <g fill="url(#brandGrad)" opacity="0.4">
+      <rect x="-3" y="-30" width="6" height="9" rx="1.5"/>
+      <rect x="-3" y="21" width="6" height="9" rx="1.5"/>
+      <rect x="-30" y="-3" width="9" height="6" rx="1.5"/>
+      <rect x="21" y="-3" width="9" height="6" rx="1.5"/>
+      <rect x="15" y="-24" width="6" height="9" rx="1.5" transform="rotate(45,18,-19.5)"/>
+      <rect x="-21" y="-24" width="6" height="9" rx="1.5" transform="rotate(-45,-18,-19.5)"/>
+      <rect x="15" y="15" width="6" height="9" rx="1.5" transform="rotate(-45,18,19.5)"/>
+      <rect x="-21" y="15" width="6" height="9" rx="1.5" transform="rotate(45,-18,19.5)"/>
+    </g>
+
+    <!-- Cercle intérieur -->
+    <circle cx="0" cy="0" r="14" fill="url(#brandGrad)" opacity="0.15"/>
+    <circle cx="0" cy="0" r="8" fill="url(#brandGrad)"/>
   </g>
-  <!-- Lettre A stylisée -->
-  <text x="100" y="155" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="40" font-weight="800" fill="#1565C0">AF</text>
+
+  <!-- Lettre A stylisée (wrench intégré) -->
+  <text x="100" y="148" text-anchor="middle" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="44" font-weight="800" fill="url(#brandGrad)" letter-spacing="-1">AF</text>
+
+  <!-- Accent visuel : petit trait horizontal sous AF -->
+  <rect x="72" y="155" width="56" height="3" rx="1.5" fill="url(#accentGrad)"/>
 </svg>

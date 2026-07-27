@@ -35,9 +35,11 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
   const [panelOpen, setPanelOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [manualText, setManualText] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
   const callbackRef = useRef(onResult);
   const recognitionRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   callbackRef.current = onResult;
 
@@ -209,18 +211,8 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
               🎤 Recherche vocale
             </p>
 
-            {!isSpeechSupported ? (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                <p className="font-semibold mb-1">
-                  🌐 Navigateur non supporté
-                </p>
-                <p>
-                  Utilisez <strong>Chrome</strong> ou <strong>Edge</strong>{" "}
-                  pour la reconnaissance vocale. Les suggestions cliquables
-                  ci-dessous fonctionnent sur tous les navigateurs.
-                </p>
-              </div>
-            ) : (
+            {/* Bouton micro (si supporté) */}
+            {isSpeechSupported && (
               <button
                 onClick={startRecording}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97]"
@@ -229,9 +221,58 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
               </button>
             )}
 
-            <p className="mt-2 text-[10px] text-muted-foreground text-center">
-              ℹ️ Chrome/Edge recommandé — fonctionne sur HTTPS
-            </p>
+            {/* Séparateur */}
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-card px-2 text-muted-foreground">
+                  {isSpeechSupported ? "ou tapez" : "tapez"} votre recherche
+                </span>
+              </div>
+            </div>
+
+            {/* Champ texte manuel (marche TOUJOURS) */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const text = manualText.trim();
+                if (text) {
+                  callbackRef.current(text);
+                  setPanelOpen(false);
+                  setManualText("");
+                  toast.success("🔍 Recherche lancée", {
+                    description: `« ${text} »`,
+                    duration: 2000,
+                  });
+                }
+              }}
+              className="flex gap-2"
+            >
+              <input
+                ref={inputRef}
+                type="text"
+                value={manualText}
+                onChange={(e) => setManualText(e.target.value)}
+                placeholder="Ex: plaquettes de frein…"
+                className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none transition-all focus:border-brand focus:ring-1 focus:ring-brand/30"
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={!manualText.trim()}
+                className="inline-flex items-center justify-center rounded-lg bg-brand px-3 text-sm font-semibold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                🔍
+              </button>
+            </form>
+
+            {!isSpeechSupported && (
+              <p className="mt-2 text-[10px] text-muted-foreground text-center">
+                ℹ️ La reconnaissance vocale nécessite Chrome/Edge sur HTTPS
+              </p>
+            )}
           </div>
 
           {/* Suggestions */}
