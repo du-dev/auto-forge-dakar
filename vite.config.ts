@@ -12,4 +12,14 @@ export default defineConfig({
     tailwindcss(),
     tsconfigPaths(),
   ],
+  server: {
+    proxy: {
+      "/api/whisper": {
+        target:
+          "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
+        changeOrigin: true,
+        rewrite: () => "",
+      },
+    },
+  },
 });

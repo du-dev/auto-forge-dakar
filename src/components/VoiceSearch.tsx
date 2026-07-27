@@ -95,18 +95,15 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
             return;
           }
 
-          const response = await fetch(
-            "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${hfToken}`,
-                "X-Wait-For-Model": "true",
-                "Content-Type": blob.type || "audio/wav",
-              },
-              body: blob,
+          const response = await fetch("/api/whisper", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${hfToken}`,
+              "X-Wait-For-Model": "true",
+              "Content-Type": blob.type || "audio/wav",
             },
-          );
+            body: blob,
+          });
 
           if (!response.ok) {
             const errBody = await response.json().catch(() => ({}));
