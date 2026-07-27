@@ -243,7 +243,7 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
       {panelOpen && !recording && (
         <div
           ref={panelRef}
-          className="absolute right-0 top-12 z-50 w-72 animate-scale-in rounded-2xl border border-border bg-card shadow-xl"
+          className="absolute right-0 top-12 z-[100] w-72 animate-scale-in rounded-2xl border border-border bg-card shadow-xl shadow-black/10"
         >
           {/* Section enregistrement */}
           <div className="border-b border-border p-4">
