@@ -33,10 +33,9 @@ AutoForge est une vitrine web moderne conçue pour connecter mécaniciens, reven
 
 ---
 
-## Démo
+## Production
 
-- **Preview** : https://id-preview--4fdf57e8-7166-49b0-8c37-09d86bdaae3e.lovable.app
-- **Production** : https://auto-forge-dakar.lovable.app
+- **Production** : https://glowing-parfait-904f26.netlify.app/
 
 ---
 
