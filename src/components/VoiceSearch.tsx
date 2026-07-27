@@ -1,13 +1,19 @@
 /**
- * VoiceSearch — Recherche vocale par API Web Speech native.
+ * VoiceSearch — Recherche vocale universelle.
  *
- * Fonctionne sur Chrome/Edge/Safari (HTTPS requis ou localhost).
- * Ne nécessite AUCUN backend, token, ou déploiement.
- * Suggestions de recherche en fallback (marche TOUJOURS).
+ * Enregistre l'audio → envoie à la Netlify Function `/api/whisper`
+ * (même origine = pas de CORS) → transcrit via Whisper API.
+ * Fonctionne sur TOUS les navigateurs (Chrome, Brave, Firefox, Edge).
+ *
+ * Token Hugging Face requis : https://huggingface.co/settings/tokens
+ * Ajouter VITE_HF_TOKEN et HF_TOKEN dans les variables d'environnement Netlify.
+ *
+ * Suggestions de recherche et champ texte en fallback (marche TOUJOURS).
  */
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "sonner";
+
 
 type VoiceSearchProps = {
   onResult: (text: string) => void;
@@ -26,122 +32,151 @@ const QUICK_SEARCHES = [
   { label: "⚙️ Embrayage", query: "embrayage" },
 ];
 
-/* Détection du support de l'API Web Speech */
-const SpeechRecognition =
-  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-const isSpeechSupported = !!SpeechRecognition;
-
 export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
   const [panelOpen, setPanelOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [manualText, setManualText] = useState("");
+  const [hfToken] = useState(() => {
+    const t = import.meta.env.VITE_HF_TOKEN;
+    return t && t !== "hf_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" ? t : null;
+  });
   const panelRef = useRef<HTMLDivElement>(null);
   const callbackRef = useRef(onResult);
-  const recognitionRef = useRef<any>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   callbackRef.current = onResult;
 
-  /* ── Démarrer la reconnaissance vocale ── */
-  const startRecording = useCallback(() => {
-    if (!isSpeechSupported) {
-      toast.error("🌐 Reconnaissance vocale non supportée", {
-        description:
-          "Utilisez Chrome ou Edge. Les suggestions cliquables fonctionnent sur tous les navigateurs.",
-        duration: 6000,
-      });
-      return;
-    }
-
+  /* ── Enregistrement audio ── */
+  const startRecording = useCallback(async () => {
     try {
-      const recognition = new SpeechRecognition();
-      recognition.lang = "fr-FR";
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
 
-      recognition.onstart = () => {
-        setRecording(true);
-        toast.info("🎤 Écoute…", {
-          description: "Parlez maintenant.",
-          duration: 10000,
-        });
+      const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4";
+
+      const recorder = new MediaRecorder(stream, { mimeType: mime });
+      audioChunksRef.current = [];
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
-      recognition.onresult = (event: any) => {
-        const text = (event.results[0][0]?.transcript || "").trim();
-        if (text) {
-          callbackRef.current(text);
-          setPanelOpen(false);
-          toast.success("✅ Résultat vocal", {
-            description: `« ${text} »`,
+      recorder.onstop = async () => {
+        setRecording(false);
+        setProcessing(true);
+
+        const blob = new Blob(audioChunksRef.current, { type: mime });
+
+        if (blob.size < 1000) {
+          toast.info("🤫 Aucune parole détectée", {
+            description: "Rien enregistré. Réessayez.",
             duration: 3000,
           });
-        } else {
-          toast.info("🤫 Aucune parole détectée", {
-            description: "Parlez plus près du micro.",
-            duration: 3000,
+          setProcessing(false);
+          return;
+        }
+
+        /* Transcrire via la Netlify Function (/api/whisper = même origine) */
+        try {
+          if (!hfToken) {
+            toast.error("🔑 Token Hugging Face manquant", {
+              description:
+                "Ajoutez VITE_HF_TOKEN dans les variables d'environnement Netlify Dashboard.",
+              duration: 6000,
+            });
+            setProcessing(false);
+            return;
+          }
+
+          const response = await fetch("/.netlify/functions/whisper", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${hfToken}`,
+              "Content-Type": blob.type || "audio/wav",
+            },
+            body: blob,
+          });
+
+          if (!response.ok) {
+            const errBody = await response.json().catch(() => ({}));
+            throw new Error(
+              `HTTP ${response.status}${errBody.error ? ": " + errBody.error : ""}`,
+            );
+          }
+
+          const result = await response.json();
+          const text = (result?.text || "").trim();
+
+          if (text) {
+            callbackRef.current(text);
+            setPanelOpen(false);
+            toast.success("✅ Résultat vocal", {
+              description: `« ${text} »`,
+              duration: 3000,
+            });
+          } else {
+            toast.info("🤫 Aucune parole détectée", {
+              description: "Parlez plus près du micro.",
+              duration: 3000,
+            });
+          }
+        } catch (err: any) {
+          console.error("Whisper API error:", err);
+          toast.error("Erreur de transcription", {
+            description:
+              err?.message?.includes("403")
+                ? "Token invalide. Vérifiez le token dans les variables d'environnement Netlify."
+                : err?.message || "Veuillez réessayer.",
+            duration: 5000,
           });
         }
+
         setProcessing(false);
-        setRecording(false);
       };
 
-      recognition.onerror = (event: any) => {
-        console.error("SpeechRecognition error:", event.error);
-        setRecording(false);
-        setProcessing(false);
-
-        const messages: Record<string, string> = {
-          "not-allowed":
-            "Autorisez le micro dans les paramètres du site.",
-          "no-speech":
-            "Aucune parole détectée. Réessayez.",
-          "network":
-            "Désactivez les Shields Brave ou utilisez Chrome/Edge.",
-          "aborted":
-            "Reconnaissance interrompue.",
-          "audio-capture":
-            "Aucun microphone détecté.",
-        };
-
-        toast.error("🎤 Erreur de reconnaissance", {
-          description:
-            messages[event.error] || `Erreur: ${event.error}. Réessayez.`,
+      recorder.start();
+      setRecording(true);
+      toast.info("🎤 Enregistrement…", {
+        description: "Parlez, puis recliquez sur le micro pour arrêter.",
+        duration: 5000,
+      });
+    } catch (err: any) {
+      console.error("Mic error:", err);
+      if (err.name === "NotAllowedError") {
+        toast.error("🔇 Microphone bloqué", {
+          description: "Autorisez le micro dans les paramètres du site.",
           duration: 5000,
         });
-      };
-
-      recognition.onend = () => {
-        setRecording(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-    } catch (err: any) {
-      console.error("SpeechRecognition error:", err);
-      setProcessing(false);
-      toast.error("🎤 Erreur", {
-        description:
-          err.message || "Impossible de démarrer la reconnaissance vocale.",
-        duration: 4000,
-      });
-    }
-  }, []);
-
-  /* Arrêter la reconnaissance */
-  const stopRecording = useCallback(() => {
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch {
-        // Ignorer les erreurs de stop
+      } else if (err.name === "NotFoundError") {
+        toast.error("🎤 Aucun micro détecté", {
+          description: "Branchez un microphone.",
+          duration: 5000,
+        });
+      } else {
+        toast.error("Erreur microphone", {
+          description: "Impossible d'accéder au micro.",
+          duration: 4000,
+        });
       }
-      recognitionRef.current = null;
     }
-    setRecording(false);
-    setProcessing(false);
+  }, [hfToken]);
+
+  /* Arrêter l'enregistrement */
+  const stopRecording = useCallback(() => {
+    const r = mediaRecorderRef.current;
+    if (r && r.state !== "inactive") r.stop();
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
   }, []);
 
   /* ── Nettoyage ── */
@@ -211,8 +246,16 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
               🎤 Recherche vocale
             </p>
 
-            {/* Bouton micro (si supporté) */}
-            {isSpeechSupported && (
+            {!hfToken ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                <p className="font-semibold mb-1">🔑 Token requis</p>
+                <p>
+                  Ajoutez <strong>VITE_HF_TOKEN</strong> dans les variables
+                  d'environnement Netlify (Dashboard → Site settings →
+                  Environment variables).
+                </p>
+              </div>
+            ) : (
               <button
                 onClick={startRecording}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.97]"
@@ -228,12 +271,12 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
               </div>
               <div className="relative flex justify-center text-xs">
                 <span className="bg-card px-2 text-muted-foreground">
-                  {isSpeechSupported ? "ou tapez" : "tapez"} votre recherche
+                  ou tapez votre recherche
                 </span>
               </div>
             </div>
 
-            {/* Champ texte manuel (marche TOUJOURS) */}
+            {/* Champ texte manuel (marche TOUJOURS — même sans token) */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -251,7 +294,6 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
               className="flex gap-2"
             >
               <input
-                ref={inputRef}
                 type="text"
                 value={manualText}
                 onChange={(e) => setManualText(e.target.value)}
@@ -267,12 +309,6 @@ export default function VoiceSearch({ onResult, disabled }: VoiceSearchProps) {
                 🔍
               </button>
             </form>
-
-            {!isSpeechSupported && (
-              <p className="mt-2 text-[10px] text-muted-foreground text-center">
-                ℹ️ La reconnaissance vocale nécessite Chrome/Edge sur HTTPS
-              </p>
-            )}
           </div>
 
           {/* Suggestions */}
