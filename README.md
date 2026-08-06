@@ -6,6 +6,19 @@ AutoForge est une vitrine web moderne conçue pour connecter mécaniciens, reven
 
 ---
 
+## Notre équipe
+
+| Prénom Nom | Rôle | GitHub |
+|---|---|---|
+| Djiby DIALLO | Chef de Produit (PM) | @Djiby20 |
+| Doudou SARR | Master Prompt Engineer | @du-dev |
+| Amadou SALL | Dev UI (No-Code) | @Amady01 |
+| Ramatoulaye SY | Responsable Impact | @Ramatoulaye |
+| Alassane DIAW | Pentesteur | @lazou4596 |
+| YEMBI KOUMBA Jordane Sandrick| feedback manager| @jordane-sandrick |
+
+---
+
 ## Table des matières
 
 1. [Fonctionnalités](#fonctionnalités)
